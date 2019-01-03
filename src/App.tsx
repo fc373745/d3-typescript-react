@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import Select from "./components/D3Basics/Select";
+import Text from "./components/D3Basics/Text";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <Select />
+                <Text />
             </div>
         );
     }

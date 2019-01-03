@@ -10,6 +10,9 @@ import Circle from "../components/Shapes/Circle";
 import Line from "../components/Shapes/Line";
 import Path from "../components/Shapes/Path";
 import Select from "../components/D3Basics/Select";
+import Text from "../components/D3Basics/Text";
+import Group from "../components/D3Basics/Group";
+import DataJoin from "../components/Data/DataJoin";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -29,4 +32,11 @@ storiesOf("Basic SVG Shapes", module)
     .add("Line", () => <Line />)
     .add("Path", () => <Path />);
 
-storiesOf("D3 Selections", module).add("Select", () => <Select />);
+storiesOf("D3 Selections", module)
+    .add("Select", () => <Select />)
+    .add("Text", () => <Text />)
+    .add("Group", () => <Group />);
+
+storiesOf("Data", module).add("Data Join", () => (
+    <DataJoin data={{ width: 100, height: 150, fill: "blue" }} />
+));
