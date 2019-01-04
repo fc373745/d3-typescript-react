@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import Text from "./components/D3Basics/Text";
+import Json from "./components/Data/Json";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <Text />
+                <Json />
             </div>
         );
     }
