@@ -13,6 +13,7 @@ import Select from "../components/D3Basics/Select";
 import Text from "../components/D3Basics/Text";
 import Group from "../components/D3Basics/Group";
 import DataJoin from "../components/Data/DataJoin";
+import MultipleJoins from "../components/Data/MultipleJoins";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -37,6 +38,8 @@ storiesOf("D3 Selections", module)
     .add("Text", () => <Text />)
     .add("Group", () => <Group />);
 
-storiesOf("Data", module).add("Data Join", () => (
-    <DataJoin data={{ width: 100, height: 150, fill: "blue" }} />
-));
+storiesOf("Data", module)
+    .add("Data Join", () => (
+        <DataJoin data={{ width: 100, height: 150, fill: "blue" }} />
+    ))
+    .add("selectAll Joins", () => <MultipleJoins />);
