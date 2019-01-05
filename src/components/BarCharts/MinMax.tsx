@@ -2,31 +2,36 @@ import React from "react";
 import { select, selectAll } from "d3-selection";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { json } from "d3-fetch";
+import { max, min, extent } from "d3-array";
 
 interface Datum {
     name: string;
     orders: number;
 }
 
-class BandScale extends React.Component<{}, {}> {
+class MinMax extends React.Component<{}, {}> {
     svgRef = React.createRef<SVGSVGElement>();
-    y = scaleLinear()
-        .domain([0, 1000])
-        .range([0, 500]);
 
     componentDidUpdate() {
-        this.renderBandScale();
+        this.renderMinMax();
     }
 
     componentDidMount() {
-        this.renderBandScale();
+        this.renderMinMax();
     }
 
-    renderBandScale() {
+    renderMinMax() {
         const selection = select(this.svgRef.current);
 
         json<Datum[]>("menu.json").then(data => {
             const rects = selection.selectAll("rect").data(data);
+            // const mininmum = min(data, d => d.orders);
+            // const maximum = max(data, d => d.orders);
+            const minmax = extent(data, d => d.orders);
+
+            const y = scaleLinear()
+                .domain([0, minmax[1]!])
+                .range([0, 500]);
 
             const x = scaleBand()
                 .domain(data.map(d => d.name))
@@ -38,7 +43,7 @@ class BandScale extends React.Component<{}, {}> {
                 .enter()
                 .append("rect")
                 .attr("width", x.bandwidth)
-                .attr("height", d => this.y(d.orders))
+                .attr("height", d => y(d.orders))
                 .attr("x", d => x(d.name)!)
                 .attr("fill", "orange");
         });
@@ -49,4 +54,4 @@ class BandScale extends React.Component<{}, {}> {
     }
 }
 
-export default BandScale;
+export default MinMax;
