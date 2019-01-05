@@ -16,6 +16,7 @@ import DataJoin from "../components/Data/DataJoin";
 import MultipleJoins from "../components/Data/MultipleJoins";
 import Enter from "../components/Data/Enter";
 import Json from "../components/Data/Json";
+import LinearScale from "../components/BarCharts/LinearScale";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -47,3 +48,5 @@ storiesOf("Data", module)
     .add("selectAll Joins", () => <MultipleJoins />)
     .add("Enter", () => <Enter />)
     .add("Json fetch", () => <Json />);
+
+storiesOf("Bar Chart", module).add("Linear Scale", () => <LinearScale />);

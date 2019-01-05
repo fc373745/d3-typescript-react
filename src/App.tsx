@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import Json from "./components/Data/Json";
+import LinearScale from "./components/BarCharts/LinearScale";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <Json />
+                <LinearScale />
             </div>
         );
     }

@@ -1,6 +1,7 @@
 import React from "react";
 import { select, selectAll } from "d3-selection";
 import { json } from "d3-fetch";
+import { scaleLinear } from "d3-scale";
 
 interface Datum {
     radius: number;
@@ -21,6 +22,7 @@ class Json extends React.Component<{}, {}> {
 
     renderJSON() {
         const selection = select(this.svgRef.current);
+
         json<Datum[]>("planets.json").then(data => {
             const circs = selection.selectAll("circle").data(data);
 
