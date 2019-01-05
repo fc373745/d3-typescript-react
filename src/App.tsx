@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import LinearScale from "./components/BarCharts/LinearScale";
+import BandScale from "./components/BarCharts/BandScale";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <LinearScale />
+                <BandScale />
             </div>
         );
     }
