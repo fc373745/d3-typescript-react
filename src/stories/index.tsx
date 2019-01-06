@@ -20,6 +20,7 @@ import LinearScale from "../components/BarCharts/LinearScale";
 import BandScale from "../components/BarCharts/BandScale";
 import BarChart from "../components/BarCharts/BarChart";
 import Axis from "../components/BarCharts/Axis";
+import TickFormat from "../components/BarCharts/TickFormat";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -56,4 +57,5 @@ storiesOf("Bar Chart", module)
     .add("Linear Scale", () => <LinearScale />)
     .add("Band Scale", () => <BandScale />)
     .add("Bar Chart Margins", () => <BarChart />)
-    .add("With Axis", () => <Axis />);
+    .add("With Axis", () => <Axis />)
+    .add("tick formatting", () => <TickFormat />);
