@@ -36,22 +36,23 @@ class Axis extends React.Component<{}, {}> {
 
         const xAxisGroup = graph
             .append("g")
-            .attr("transform", `translate(0, ${graphHeight + margin.top})`);
+            .attr("transform", `translate(0, ${graphHeight})`);
+
         const yAxisGroup = graph.append("g");
 
         json<Datum[]>("menu.json").then(data => {
             const rects = graph.selectAll("rect").data(data);
             // const mininmum = min(data, d => d.orders);
             // const maximum = max(data, d => d.orders);
-            const minmax = extent(data, d => d.orders);
+            // const minmax = extent(data, d => d.orders);
 
             const y = scaleLinear()
-                .domain([0, minmax[1]!])
-                .range([0, 500]);
+                .domain([0, max(data, d => d.orders)!])
+                .range([graphHeight, 0]);
 
             const x = scaleBand()
                 .domain(data.map(d => d.name))
-                .range([0, 600])
+                .range([0, graphWidth])
                 .paddingInner(0.2)
                 .paddingOuter(0.2);
 
@@ -59,7 +60,8 @@ class Axis extends React.Component<{}, {}> {
                 .enter()
                 .append("rect")
                 .attr("width", x.bandwidth)
-                .attr("height", d => y(d.orders))
+                .attr("height", d => graphHeight - y(d.orders))
+                .attr("y", d => y(d.orders))
                 .attr("x", d => x(d.name)!)
                 .attr("fill", "orange");
 
