@@ -21,6 +21,7 @@ import BandScale from "../components/BarCharts/BandScale";
 import BarChart from "../components/BarCharts/BarChart";
 import Axis from "../components/BarCharts/Axis";
 import TickFormat from "../components/BarCharts/TickFormat";
+import DataFetch from "../components/DataFetch/DataFetch";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -59,3 +60,7 @@ storiesOf("Bar Chart", module)
     .add("Bar Chart Margins", () => <BarChart />)
     .add("With Axis", () => <Axis />)
     .add("tick formatting", () => <TickFormat />);
+
+storiesOf("Data Fetching with firebase", module).add("Data Fetching", () => (
+    <DataFetch />
+));
