@@ -1,6 +1,7 @@
 import React from "react";
 import firebase from "firebase";
 import { select, selectAll } from "d3-selection";
+import config from "./CONFIG_FIRESTORE";
 
 interface data {
     name?: string;
@@ -11,15 +12,6 @@ interface State {
     data: data[];
     update: boolean;
 }
-
-const config = {
-    apiKey: "AIzaSyCgRaSO-CcOjFOTmGX8tkNAqARtTxJo8P0",
-    authDomain: "d3-firebase-a03ce.firebaseapp.com",
-    databaseURL: "https://d3-firebase-a03ce.firebaseio.com",
-    projectId: "d3-firebase-a03ce",
-    storageBucket: "d3-firebase-a03ce.appspot.com",
-    messagingSenderId: "45771992645"
-};
 
 firebase.initializeApp(config);
 const db = firebase.firestore();
