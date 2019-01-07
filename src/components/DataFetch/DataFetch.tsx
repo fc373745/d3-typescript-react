@@ -1,5 +1,6 @@
 import React from "react";
 import firebase from "firebase";
+import { select, selectAll } from "d3-selection";
 
 interface data {
     name?: string;
@@ -8,6 +9,7 @@ interface data {
 
 interface State {
     data: data[];
+    update: boolean;
 }
 
 const config = {
@@ -24,15 +26,25 @@ const db = firebase.firestore();
 db.settings({ timestampsInSnapshots: true });
 
 class DataFetch extends React.Component<{}, State> {
+    svgRef = React.createRef<SVGSVGElement>();
+
     state: Readonly<State> = {
-        data: []
+        data: [],
+        update: false
     };
 
     componentDidMount() {
-        this.renderChart();
+        this.collectData();
     }
 
-    renderChart() {
+    componentDidUpdate() {
+        if (this.state.update) {
+            this.setState({ update: false });
+            this.renderChart();
+        }
+    }
+
+    collectData() {
         db.collection("dishes")
             .get()
             .then(res => {
@@ -40,20 +52,29 @@ class DataFetch extends React.Component<{}, State> {
                 res.docs.forEach(doc => {
                     data.push(doc.data());
                 });
-                this.setState({ data });
+                this.setState({ data, update: true });
             })
             .catch(err => console.log(err));
+    }
+
+    renderChart() {
+        const selection = select(this.svgRef.current);
+
+        const rects = selection.selectAll("rect").data(this.state.data);
+
+        rects
+            .enter()
+            .append("rect")
+            .attr("height", d => d.orders!)
+            .attr("x", (d, i) => i * 70)
+            .attr("width", 50)
+            .attr("fill", "black");
     }
 
     render() {
         return (
             <div>
-                <ul>
-                    {this.state.data &&
-                        this.state.data.map(dat => {
-                            return <li key={dat.name}>{dat.name}</li>;
-                        })}
-                </ul>
+                <svg width={1000} height={1200} ref={this.svgRef} />
             </div>
         );
     }
