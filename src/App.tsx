@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import DataFetch from "./components/DataFetch/DataFetch";
+import EnterExit from "./components/Update/EnterExit";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <DataFetch />
+                <EnterExit />
             </div>
         );
     }

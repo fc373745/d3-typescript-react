@@ -2,6 +2,9 @@ import React from "react";
 import firebase from "firebase";
 import { select, selectAll } from "d3-selection";
 import config from "./CONFIG_FIRESTORE";
+import { scaleLinear, scaleBand } from "d3-scale";
+import { max } from "d3-array";
+import { axisBottom, axisLeft } from "d3-axis";
 
 interface data {
     name?: string;
@@ -17,8 +20,19 @@ firebase.initializeApp(config);
 const db = firebase.firestore();
 db.settings({ timestampsInSnapshots: true });
 
-class DataFetch extends React.Component<{}, State> {
+class EnterExit extends React.Component<{}, State> {
     svgRef = React.createRef<SVGSVGElement>();
+
+    margin = { top: 10, bottom: 100, left: 100, right: 0 };
+    graphHeight = 700 - this.margin.top - this.margin.bottom;
+    graphWidth = 1000 - this.margin.left;
+
+    y = scaleLinear().range([this.graphHeight, 0]);
+
+    x = scaleBand()
+        .range([0, this.graphWidth])
+        .paddingInner(0.2)
+        .paddingOuter(0.2);
 
     state: Readonly<State> = {
         data: [],
@@ -52,14 +66,48 @@ class DataFetch extends React.Component<{}, State> {
     renderChart() {
         const selection = select(this.svgRef.current);
 
-        const rects = selection.selectAll("rect").data(this.state.data);
+        const graph = selection
+            .append("g")
+            .attr("height", this.graphHeight)
+            .attr("width", this.graphWidth)
+            .attr(
+                "transform",
+                `translate(${this.margin.left}, ${this.margin.top})`
+            );
+
+        this.y.domain([0, max(this.state.data, d => d.orders)!]);
+        this.x.domain(this.state.data.map(d => d.name!));
+
+        const xAxisGroup = graph
+            .append("g")
+            .attr("transform", `translate(0, ${this.graphHeight})`);
+
+        const yAxisGroup = graph.append("g");
+
+        const rects = graph.selectAll("rect").data(this.state.data);
 
         rects
             .enter()
             .append("rect")
-            .attr("height", d => d.orders!)
-            .attr("x", (d, i) => i * 70)
-            .attr("width", 50)
+            .attr("height", d => this.graphHeight - this.y(d.orders!))
+            .attr("x", d => this.x(d.name!)!)
+            .attr("y", d => this.y(d.orders!))
+            .attr("width", this.x.bandwidth())
+            .attr("fill", "orange");
+
+        const xAxis = axisBottom(this.x);
+        const yAxis = axisLeft(this.y)
+            .ticks(7)
+            .tickFormat(d => `${d} orders`);
+
+        xAxisGroup.call(xAxis);
+        yAxisGroup.call(yAxis);
+
+        xAxisGroup
+            .selectAll("text")
+            .attr("transform", "rotate(-40)")
+            .attr("text-anchor", "end")
+            .attr("font-size", ".8rem")
             .attr("fill", "orange");
     }
 
@@ -72,7 +120,7 @@ class DataFetch extends React.Component<{}, State> {
     }
 }
 
-export default DataFetch;
+export default EnterExit;
 
 {
     /* <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
