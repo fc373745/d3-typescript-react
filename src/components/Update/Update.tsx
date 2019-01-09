@@ -3,6 +3,8 @@ import { select, selectAll } from "d3-selection";
 import { scaleLinear, scaleBand } from "d3-scale";
 import { max } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
+import { transition } from "d3-transition";
+import { easeLinear } from "d3-ease";
 
 interface State {
     data: Datum[];
@@ -21,6 +23,10 @@ class Update extends React.Component<{}, State> {
     margin = { top: 10, left: 100, right: 0, bottom: 100 };
     graphHeight = 700 - this.margin.top - this.margin.bottom;
     graphWidth = 1000 - this.margin.left;
+
+    t = transition()
+        .duration(750)
+        .ease(easeLinear);
 
     y = scaleLinear().range([this.graphHeight, 0]);
     x = scaleBand()
@@ -68,11 +74,16 @@ class Update extends React.Component<{}, State> {
         selection
             .selectAll("rect")
             .data(this.state.data)
-            .attr("height", d => this.graphHeight - this.y(d.orders))
             .attr("x", d => this.x(d.name)!)
-            .attr("y", d => this.y(d.orders))
+            .attr("height", 0)
+            .attr("y", this.graphHeight)
             .attr("width", this.x.bandwidth())
-            .attr("fill", "orange");
+            .attr("fill", "orange")
+            .transition()
+            .duration(500)
+            .ease(easeLinear)
+            .attr("y", d => this.y(d.orders))
+            .attr("height", d => this.graphHeight - this.y(d.orders));
     }
 
     addClick = () => {
@@ -98,11 +109,21 @@ class Update extends React.Component<{}, State> {
         this.setState({ data });
     };
 
+    randomize = () => {
+        let initData = [...this.state.data];
+        let data = initData.map(d => ({
+            name: d.name,
+            orders: Math.floor(Math.random() * (800 - 200) + 200)
+        }));
+        this.setState({ data });
+    };
+
     render() {
         return (
             <div>
                 <button onClick={this.addClick}>Add</button>
                 <button onClick={this.deleteClick}>Delete</button>
+                <button onClick={this.randomize}>Randomize</button>
                 <svg width={1000} height={800}>
                     <g ref={this.axisRef} />
                     <g ref={this.chartRef} />
