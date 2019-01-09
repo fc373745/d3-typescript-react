@@ -6,6 +6,7 @@ import { axisBottom, axisLeft } from "d3-axis";
 
 interface State {
     data: Datum[];
+    count: number;
 }
 
 interface Datum {
@@ -27,7 +28,8 @@ class Update extends React.Component<{}, State> {
         .padding(0.1);
 
     state = {
-        data: initialState
+        data: initialState,
+        count: 0
     };
 
     componentDidMount() {
@@ -73,7 +75,20 @@ class Update extends React.Component<{}, State> {
             .attr("fill", "orange");
     }
 
-    addClick = () => {};
+    addClick = () => {
+        this.setState(prevState => {
+            return {
+                data: [
+                    ...prevState.data,
+                    {
+                        name: `veg${this.state.count}`,
+                        orders: Math.floor(Math.random() * (800 - 200) + 200)
+                    }
+                ],
+                count: prevState.count + 1
+            };
+        });
+    };
 
     deleteClick = () => {
         let data = [...this.state.data];
