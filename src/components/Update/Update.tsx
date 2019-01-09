@@ -79,6 +79,7 @@ class Update extends React.Component<{}, State> {
             .attr("y", this.graphHeight)
             .attr("width", this.x.bandwidth())
             .attr("fill", "orange")
+            // .merge(selection.selectAll("rects"))
             .transition()
             .duration(500)
             .ease(easeLinear)

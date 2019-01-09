@@ -22,6 +22,7 @@ import BarChart from "../components/BarCharts/BarChart";
 import Axis from "../components/BarCharts/Axis";
 import TickFormat from "../components/BarCharts/TickFormat";
 import DataFetch from "../components/DataFetch/DataFetch";
+import Update from "../components/Update/Update";
 
 // storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 
@@ -64,3 +65,5 @@ storiesOf("Bar Chart", module)
 storiesOf("Data Fetching with firebase", module).add("Data Fetching", () => (
     <DataFetch />
 ));
+
+storiesOf("Updating", module).add("Add/Delete/Random", () => <Update />);
