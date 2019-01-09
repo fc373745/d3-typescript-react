@@ -141,7 +141,7 @@ class EnterExit extends React.Component<{}, State> {
     render() {
         return (
             <div>
-                <svg width={1000} height={1200}>
+                <svg width={1000} height={850}>
                     <g ref={this.svgRef} />
                 </svg>
                 <button onClick={this.onClick}>Add</button>

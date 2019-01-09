@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import EnterExit from "./components/Update/EnterExit";
+import Update from "./components/Update/Update";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <EnterExit />
+                <Update />
             </div>
         );
     }
