@@ -1,6 +1,6 @@
 import React from "react";
 import firebase from "firebase";
-import { select, selectAll } from "d3-selection";
+import { select, selectAll, selection } from "d3-selection";
 import config from "./CONFIG_FIRESTORE";
 import { scaleLinear, scaleBand } from "d3-scale";
 import { max } from "d3-array";
@@ -22,28 +22,6 @@ db.settings({ timestampsInSnapshots: true });
 
 class EnterExit extends React.Component<{}, State> {
     svgRef = React.createRef<SVGSVGElement>();
-
-    margin = { top: 10, bottom: 100, left: 100, right: 0 };
-    graphHeight = 700 - this.margin.top - this.margin.bottom;
-    graphWidth = 1000 - this.margin.left;
-
-    y = scaleLinear().range([this.graphHeight, 0]);
-
-    x = scaleBand()
-        .range([0, this.graphWidth])
-        .paddingInner(0.2)
-        .paddingOuter(0.2);
-
-    selection = select(this.svgRef.current);
-
-    graph = this.selection
-        .append("g")
-        .attr("height", this.graphHeight)
-        .attr("width", this.graphWidth)
-        .attr(
-            "transform",
-            `translate(${this.margin.left}, ${this.margin.top})`
-        );
 
     state: Readonly<State> = {
         data: [],
@@ -69,34 +47,67 @@ class EnterExit extends React.Component<{}, State> {
                 res.docs.forEach(doc => {
                     data.push(doc.data());
                 });
-                this.setState({ data, update: true });
+                this.setState({ data, update: true }, () =>
+                    console.log(this.state.data)
+                );
             })
             .catch(err => console.log(err));
     }
 
     renderChart() {
-        this.y.domain([0, max(this.state.data, d => d.orders)!]);
-        this.x.domain(this.state.data.map(d => d.name!));
+        const margin = { top: 10, bottom: 100, left: 100, right: 0 };
+        const graphHeight = 700 - margin.top - margin.bottom;
+        const graphWidth = 1000 - margin.left;
 
-        const xAxisGroup = this.graph
+        const y = scaleLinear().range([graphHeight, 0]);
+
+        const x = scaleBand()
+            .range([0, graphWidth])
+            .paddingInner(0.2)
+            .paddingOuter(0.2);
+
+        const selection = select(this.svgRef.current);
+
+        const graph = selection
+            .attr("height", graphHeight)
+            .attr("width", graphWidth)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        y.domain([0, max(this.state.data, d => d.orders)!]);
+        x.domain(this.state.data.map(d => d.name!));
+
+        const xAxisGroup = graph
             .append("g")
-            .attr("transform", `translate(0, ${this.graphHeight})`);
+            .attr("transform", `translate(0, ${graphHeight})`);
 
-        const yAxisGroup = this.graph.append("g");
+        const yAxisGroup = graph.append("g");
 
-        const rects = this.graph.selectAll("rect").data(this.state.data);
+        const rects = graph.selectAll("rect").data(this.state.data);
 
-        rects
+        select(this.svgRef.current)
+            .selectAll("rect")
+            .data(this.state.data)
             .enter()
-            .append("rect")
-            .attr("height", d => this.graphHeight - this.y(d.orders!))
-            .attr("x", d => this.x(d.name!)!)
-            .attr("y", d => this.y(d.orders!))
-            .attr("width", this.x.bandwidth())
+            .append("rect");
+
+        select(this.svgRef.current)
+            .selectAll("rect")
+            .data(this.state.data)
+            .exit()
+            .remove();
+        // rects.enter().append("rect");
+
+        select(this.svgRef.current)
+            .selectAll("rect")
+            .data(this.state.data)
+            .attr("height", d => graphHeight - y(d.orders!))
+            .attr("x", d => x(d.name!)!)
+            .attr("y", d => y(d.orders!))
+            .attr("width", x.bandwidth())
             .attr("fill", "orange");
 
-        const xAxis = axisBottom(this.x);
-        const yAxis = axisLeft(this.y)
+        const xAxis = axisBottom(x);
+        const yAxis = axisLeft(y)
             .ticks(7)
             .tickFormat(d => `${d} orders`);
 
@@ -111,39 +122,28 @@ class EnterExit extends React.Component<{}, State> {
             .attr("fill", "orange");
     }
 
-    update() {
-        this.y.domain([0, max(this.state.data, d => d.orders)!]);
-        this.x.domain(this.state.data.map(d => d.name!));
-
-        const rects = this.graph.selectAll("rect").data(this.state.data);
-
-        rects.exit().remove();
-
-        rects
-            .attr("width", this.x.bandwidth)
-            .attr("height", d => this.graphHeight - this.y(d.orders!))
-            .attr("fill", "orange")
-            .attr("x", d => this.x(d.name!)!)
-            .attr("y", d => this.y(d.orders!));
-    }
-
-    onClick() {
-        this.setState(prev => ({
-            data: [
-                ...prev.data,
-                {
-                    name: "anotha one",
-                    orders: Math.random() * (900 - 200) + 200
-                }
-            ]
-        }));
-    }
+    onClick = () => {
+        this.setState(
+            prev => ({
+                data: [
+                    ...prev.data,
+                    {
+                        name: "anotha one",
+                        orders: Math.floor(Math.random() * (900 - 200) + 200)
+                    }
+                ],
+                update: true
+            }),
+            () => console.log(this.state.data)
+        );
+    };
 
     render() {
-        console.log("wtf");
         return (
             <div>
-                <svg width={1000} height={1200} ref={this.svgRef} />
+                <svg width={1000} height={1200}>
+                    <g ref={this.svgRef} />
+                </svg>
                 <button onClick={this.onClick}>Add</button>
             </div>
         );
