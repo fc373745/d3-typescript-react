@@ -34,6 +34,17 @@ class EnterExit extends React.Component<{}, State> {
         .paddingInner(0.2)
         .paddingOuter(0.2);
 
+    selection = select(this.svgRef.current);
+
+    graph = this.selection
+        .append("g")
+        .attr("height", this.graphHeight)
+        .attr("width", this.graphWidth)
+        .attr(
+            "transform",
+            `translate(${this.margin.left}, ${this.margin.top})`
+        );
+
     state: Readonly<State> = {
         data: [],
         update: false
@@ -64,27 +75,16 @@ class EnterExit extends React.Component<{}, State> {
     }
 
     renderChart() {
-        const selection = select(this.svgRef.current);
-
-        const graph = selection
-            .append("g")
-            .attr("height", this.graphHeight)
-            .attr("width", this.graphWidth)
-            .attr(
-                "transform",
-                `translate(${this.margin.left}, ${this.margin.top})`
-            );
-
         this.y.domain([0, max(this.state.data, d => d.orders)!]);
         this.x.domain(this.state.data.map(d => d.name!));
 
-        const xAxisGroup = graph
+        const xAxisGroup = this.graph
             .append("g")
             .attr("transform", `translate(0, ${this.graphHeight})`);
 
-        const yAxisGroup = graph.append("g");
+        const yAxisGroup = this.graph.append("g");
 
-        const rects = graph.selectAll("rect").data(this.state.data);
+        const rects = this.graph.selectAll("rect").data(this.state.data);
 
         rects
             .enter()
@@ -111,10 +111,40 @@ class EnterExit extends React.Component<{}, State> {
             .attr("fill", "orange");
     }
 
+    update() {
+        this.y.domain([0, max(this.state.data, d => d.orders)!]);
+        this.x.domain(this.state.data.map(d => d.name!));
+
+        const rects = this.graph.selectAll("rect").data(this.state.data);
+
+        rects.exit().remove();
+
+        rects
+            .attr("width", this.x.bandwidth)
+            .attr("height", d => this.graphHeight - this.y(d.orders!))
+            .attr("fill", "orange")
+            .attr("x", d => this.x(d.name!)!)
+            .attr("y", d => this.y(d.orders!));
+    }
+
+    onClick() {
+        this.setState(prev => ({
+            data: [
+                ...prev.data,
+                {
+                    name: "anotha one",
+                    orders: Math.random() * (900 - 200) + 200
+                }
+            ]
+        }));
+    }
+
     render() {
+        console.log("wtf");
         return (
             <div>
                 <svg width={1000} height={1200} ref={this.svgRef} />
+                <button onClick={this.onClick}>Add</button>
             </div>
         );
     }
