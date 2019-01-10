@@ -4,7 +4,8 @@ import { scaleLinear, scaleBand } from "d3-scale";
 import { max } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { transition } from "d3-transition";
-import { easeLinear } from "d3-ease";
+import { easeLinear, easeBounceInOut } from "d3-ease";
+import { interpolateNumber } from "d3-interpolate";
 
 interface State {
     data: Datum[];
@@ -81,8 +82,9 @@ class Update extends React.Component<{}, State> {
             .attr("fill", "orange")
             // .merge(selection.selectAll("rects"))
             .transition()
+            .attrTween("width", this.widthTween)
             .duration(500)
-            .ease(easeLinear)
+            .ease(easeBounceInOut)
             .attr("y", d => this.y(d.orders))
             .attr("height", d => this.graphHeight - this.y(d.orders));
     }
@@ -117,6 +119,14 @@ class Update extends React.Component<{}, State> {
             orders: Math.floor(Math.random() * (800 - 200) + 200)
         }));
         this.setState({ data });
+    };
+
+    widthTween = () => {
+        let i = interpolateNumber(0, this.x.bandwidth());
+
+        return (t: number) => {
+            return i(t) as any;
+        };
     };
 
     render() {
