@@ -82,6 +82,7 @@ class Update extends React.Component<{}, State> {
             .attr("fill", "orange")
             // .merge(selection.selectAll("rects"))
             .transition()
+            .delay((d, i) => i * 70)
             .attrTween("width", this.widthTween)
             .duration(500)
             .ease(easeBounceInOut)
@@ -125,7 +126,7 @@ class Update extends React.Component<{}, State> {
         let i = interpolateNumber(0, this.x.bandwidth());
 
         return (t: number) => {
-            return i(t) as any;
+            return i(t) + "";
         };
     };
 
