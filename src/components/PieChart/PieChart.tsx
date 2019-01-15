@@ -24,6 +24,13 @@ type State = {
 class PieChart extends React.Component<{}, State> {
     dimensions = { height: 300, width: 300, radius: 150 };
     arcRef = React.createRef<SVGSVGElement>();
+    pieChart = pie<Datum>()
+        .sort(null)
+        .value((d: Datum) => d.price);
+    arcPath = arc()
+        .outerRadius(this.dimensions.radius)
+        .innerRadius(this.dimensions.radius / 2);
+
     cent = {
         x: this.dimensions.width / 2 + 5,
         y: this.dimensions.height / 2 + 5
@@ -48,7 +55,7 @@ class PieChart extends React.Component<{}, State> {
                 const selection = select(this.arcRef.current);
                 this.setState(
                     { collection: data, arcSelection: selection },
-                    () => this.renderPie()
+                    () => this.update(this.state.collection)
                 );
             });
     }
@@ -60,18 +67,33 @@ class PieChart extends React.Component<{}, State> {
                 .attr("transform", `translate(${this.cent.x}, ${this.cent.y})`);
         }
 
-        const pieChart = pie<Datum>()
-            .sort(null)
-            .value((d: Datum) => d.price);
-
         // spits out new array that has start angles and end angles
-        const angles = pieChart(this.state.collection);
+        const angles = this.pieChart(this.state.collection);
 
         const arcPath = arc()
             .outerRadius(this.dimensions.radius)
             .innerRadius(this.dimensions.radius / 2);
 
         console.log(arcPath(angles[0] as any));
+    };
+
+    update = (data: Datum[]) => {
+        const arcSelection = this.state.arcSelection;
+        if (arcSelection) {
+            const paths = arcSelection
+                .append("g")
+                .attr("transform", `translate(${this.cent.x}, ${this.cent.y})`)
+                .selectAll("path")
+                .data(this.pieChart(data));
+
+            paths
+                .enter()
+                .append("path")
+                .attr("class", "arc")
+                .attr("d", this.arcPath as any)
+                .attr("stroke", "red")
+                .attr("stroke-width", 3);
+        }
     };
     addItem = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
