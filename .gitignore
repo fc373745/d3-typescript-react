@@ -24,3 +24,4 @@ yarn-error.log*
 
 
 CONFIG_FIRESTORE.tsx
+CONFIG_SETTINGS.tsx
