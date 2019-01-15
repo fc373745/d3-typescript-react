@@ -1,6 +1,8 @@
 import React from "react";
 import firebase from "firebase";
 import config from "./CONFIG_SETTINGS";
+import { select, Selection } from "d3-selection";
+import { pie } from "d3-shape";
 
 firebase.initializeApp(config);
 const db = firebase.firestore();
@@ -10,23 +12,66 @@ type State = {
     name: string;
     price: string;
     message: string;
+    arcSelection: Selection<SVGSVGElement | null, {}, null, undefined> | null;
 };
 
-type addToFirebase = {
+type datum = {
     name: string;
     price: number;
 };
 
 class PieChart extends React.Component<{}, State> {
+    dimensions = { height: 300, width: 300, radius: 150 };
+    arcRef = React.createRef<SVGSVGElement>();
+    cent = {
+        x: this.dimensions.width / 2 + 5,
+        y: this.dimensions.height / 2 + 5
+    };
+
     state: State = {
         name: "",
         price: "",
-        message: ""
+        message: "",
+        arcSelection: null
+    };
+
+    componentDidMount() {
+        const selection = select(this.arcRef.current);
+        this.setState({ arcSelection: selection }, () => this.renderPie());
+    }
+    renderPie = () => {
+        const arcSelection = this.state.arcSelection;
+        if (arcSelection) {
+            arcSelection
+                .append("g")
+                .attr("transform", `translate(${this.cent.x}, ${this.cent.y})`);
+        }
+
+        const pieChart = pie<datum>()
+            .sort(null)
+            .value(d => d.price);
+
+        const angles = pieChart([
+            {
+                name: "rent",
+                price: 800
+            },
+            {
+                name: "phone",
+                price: 100
+            },
+            {
+                name: "food",
+                price: 300
+            }
+        ]);
+
+        console.log(angles);
     };
     addItem = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (this.state.price) {
-            const data: addToFirebase = {
+            const data: datum = {
                 name: this.state.name,
                 price: parseInt(this.state.price)
             };
@@ -55,6 +100,11 @@ class PieChart extends React.Component<{}, State> {
     render() {
         return (
             <div>
+                <svg
+                    ref={this.arcRef}
+                    width={this.dimensions.width + 150}
+                    height={this.dimensions.height + 150}
+                />
                 <form>
                     {this.state.message && (
                         <div>
