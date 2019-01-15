@@ -2,7 +2,7 @@ import React from "react";
 import firebase from "firebase";
 import config from "./CONFIG_SETTINGS";
 import { select, Selection } from "d3-selection";
-import { pie } from "d3-shape";
+import { pie, arc, Arc } from "d3-shape";
 
 firebase.initializeApp(config);
 const db = firebase.firestore();
@@ -15,7 +15,7 @@ type State = {
     arcSelection: Selection<SVGSVGElement | null, {}, null, undefined> | null;
 };
 
-type datum = {
+type Datum = {
     name: string;
     price: number;
 };
@@ -47,10 +47,11 @@ class PieChart extends React.Component<{}, State> {
                 .attr("transform", `translate(${this.cent.x}, ${this.cent.y})`);
         }
 
-        const pieChart = pie<datum>()
+        const pieChart = pie<Datum>()
             .sort(null)
-            .value(d => d.price);
+            .value((d: Datum) => d.price);
 
+        // spits out new array that has start angles and end angles
         const angles = pieChart([
             {
                 name: "rent",
@@ -66,12 +67,16 @@ class PieChart extends React.Component<{}, State> {
             }
         ]);
 
-        console.log(angles);
+        const arcPath = arc()
+            .outerRadius(this.dimensions.radius)
+            .innerRadius(this.dimensions.radius / 2);
+
+        console.log(arcPath(angles[0] as any));
     };
     addItem = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (this.state.price) {
-            const data: datum = {
+            const data: Datum = {
                 name: this.state.name,
                 price: parseInt(this.state.price)
             };
