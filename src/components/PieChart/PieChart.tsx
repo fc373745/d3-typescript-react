@@ -3,6 +3,8 @@ import firebase from "firebase";
 import config from "./CONFIG_SETTINGS";
 import { select, Selection } from "d3-selection";
 import { pie, arc, Arc } from "d3-shape";
+import { scaleOrdinal } from "d3-scale";
+import { schemeSet3 } from "d3-scale-chromatic";
 
 firebase.initializeApp(config);
 const db = firebase.firestore();
@@ -30,6 +32,7 @@ class PieChart extends React.Component<{}, State> {
     arcPath = arc()
         .outerRadius(this.dimensions.radius)
         .innerRadius(this.dimensions.radius / 2);
+    color = scaleOrdinal(schemeSet3);
 
     cent = {
         x: this.dimensions.width / 2 + 5,
@@ -45,6 +48,22 @@ class PieChart extends React.Component<{}, State> {
     };
 
     componentDidMount() {
+        db.collection("expenses")
+            .get()
+            .then(res => {
+                let data: Datum[] = [];
+                res.docs.forEach(doc => {
+                    data.push(doc.data() as any);
+                });
+                const selection = select(this.arcRef.current);
+                this.setState(
+                    { collection: data, arcSelection: selection },
+                    () => this.update(this.state.collection)
+                );
+            });
+    }
+
+    componentDidUpdate() {
         db.collection("expenses")
             .get()
             .then(res => {
@@ -79,6 +98,8 @@ class PieChart extends React.Component<{}, State> {
 
     update = (data: Datum[]) => {
         const arcSelection = this.state.arcSelection;
+
+        this.color.domain(data.map(d => d.name));
         if (arcSelection) {
             const paths = arcSelection
                 .append("g")
@@ -92,7 +113,8 @@ class PieChart extends React.Component<{}, State> {
                 .attr("class", "arc")
                 .attr("d", this.arcPath as any)
                 .attr("stroke", "red")
-                .attr("stroke-width", 3);
+                .attr("stroke-width", 3)
+                .attr("fill", d => this.color(d.data.name));
         }
     };
     addItem = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
