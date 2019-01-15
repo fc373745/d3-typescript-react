@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import Update from "./components/Update/Update";
+import PieChart from "./components/PieChart/PieChart";
 
 class App extends Component {
     render() {
         return (
             <div>
-                <Update />
+                <PieChart />
             </div>
         );
     }

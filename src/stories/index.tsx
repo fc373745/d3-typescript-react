@@ -62,8 +62,8 @@ storiesOf("Bar Chart", module)
     .add("With Axis", () => <Axis />)
     .add("tick formatting", () => <TickFormat />);
 
-// storiesOf("Data Fetching with firebase", module).add("Data Fetching", () => (
-//     <DataFetch />
-// ));
+storiesOf("Data Fetching with firebase", module).add("Data Fetching", () => (
+    <DataFetch />
+));
 
 storiesOf("Updating", module).add("Add/Delete/Random", () => <Update />);
