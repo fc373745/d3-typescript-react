@@ -8,16 +8,17 @@ firebase.initializeApp(config);
 const db = firebase.firestore();
 db.settings({ timestampsInSnapshots: true });
 
+type Datum = {
+    name: string;
+    price: number;
+};
+
 type State = {
     name: string;
     price: string;
     message: string;
     arcSelection: Selection<SVGSVGElement | null, {}, null, undefined> | null;
-};
-
-type Datum = {
-    name: string;
-    price: number;
+    collection: Datum[];
 };
 
 class PieChart extends React.Component<{}, State> {
@@ -28,16 +29,28 @@ class PieChart extends React.Component<{}, State> {
         y: this.dimensions.height / 2 + 5
     };
 
-    state: State = {
+    state: Readonly<State> = {
         name: "",
         price: "",
         message: "",
-        arcSelection: null
+        arcSelection: null,
+        collection: []
     };
 
     componentDidMount() {
-        const selection = select(this.arcRef.current);
-        this.setState({ arcSelection: selection }, () => this.renderPie());
+        db.collection("expenses")
+            .get()
+            .then(res => {
+                let data: Datum[] = [];
+                res.docs.forEach(doc => {
+                    data.push(doc.data() as any);
+                });
+                const selection = select(this.arcRef.current);
+                this.setState(
+                    { collection: data, arcSelection: selection },
+                    () => this.renderPie()
+                );
+            });
     }
     renderPie = () => {
         const arcSelection = this.state.arcSelection;
@@ -52,20 +65,7 @@ class PieChart extends React.Component<{}, State> {
             .value((d: Datum) => d.price);
 
         // spits out new array that has start angles and end angles
-        const angles = pieChart([
-            {
-                name: "rent",
-                price: 800
-            },
-            {
-                name: "phone",
-                price: 100
-            },
-            {
-                name: "food",
-                price: 300
-            }
-        ]);
+        const angles = pieChart(this.state.collection);
 
         const arcPath = arc()
             .outerRadius(this.dimensions.radius)
