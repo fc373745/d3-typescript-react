@@ -2,9 +2,11 @@ import React from "react";
 import firebase from "firebase";
 import config from "./CONFIG_SETTINGS";
 import { select, Selection } from "d3-selection";
-import { pie, arc, Arc } from "d3-shape";
+import { pie, arc, Arc, DefaultArcObject } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
 import { schemeSet3 } from "d3-scale-chromatic";
+import { interpolate } from "d3-interpolate";
+import "d3-transition";
 
 firebase.initializeApp(config);
 const db = firebase.firestore();
@@ -86,6 +88,15 @@ class PieChart extends React.Component<{}, State> {
                 });
         }
     }
+
+    arcTweenEnter = (d: DefaultArcObject) => {
+        let i = interpolate(d.endAngle, d.startAngle);
+
+        return (t: number) => {
+            d.startAngle = i(t);
+            return this.arcPath(d);
+        };
+    };
     renderPie = () => {
         const arcSelection = this.state.arcSelection;
         if (arcSelection) {
@@ -123,10 +134,12 @@ class PieChart extends React.Component<{}, State> {
                 .enter()
                 .append("path")
                 .attr("class", "arc")
-                .attr("d", this.arcPath as any)
                 .attr("stroke", "red")
                 .attr("stroke-width", 3)
-                .attr("fill", d => this.color(d.data.name));
+                .attr("fill", d => this.color(d.data.name))
+                .transition()
+                .duration(750)
+                .attrTween("d", this.arcTweenEnter as any);
         }
     };
     addItem = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
