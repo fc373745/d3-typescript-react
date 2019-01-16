@@ -15,6 +15,7 @@ db.settings({ timestampsInSnapshots: true });
 type Datum = {
     name: string;
     price: number;
+    id?: string;
 };
 
 type State = {
@@ -23,7 +24,7 @@ type State = {
     message: string;
     arcSelection: Selection<SVGSVGElement | null, {}, null, undefined> | null;
     collection: Datum[];
-    added: boolean;
+    updated: boolean;
 };
 
 class PieChart extends React.Component<{}, State> {
@@ -48,7 +49,7 @@ class PieChart extends React.Component<{}, State> {
         message: "",
         arcSelection: null,
         collection: [],
-        added: false
+        updated: false
     };
 
     componentDidMount() {
@@ -57,7 +58,9 @@ class PieChart extends React.Component<{}, State> {
             .then(res => {
                 let data: Datum[] = [];
                 res.docs.forEach(doc => {
-                    data.push(doc.data() as any);
+                    let fullDocument = doc.data();
+                    fullDocument.id = doc.id;
+                    data.push(fullDocument as Datum);
                 });
                 const selection = select(this.arcRef.current);
                 this.setState(
@@ -68,20 +71,22 @@ class PieChart extends React.Component<{}, State> {
     }
 
     componentDidUpdate() {
-        if (this.state.added) {
+        if (this.state.updated) {
             db.collection("expenses")
                 .get()
                 .then(res => {
                     let data: Datum[] = [];
                     res.docs.forEach(doc => {
-                        data.push(doc.data() as any);
+                        let fullDocument = doc.data();
+                        fullDocument.id = doc.id;
+                        data.push(fullDocument as Datum);
                     });
                     const selection = select(this.arcRef.current);
                     this.setState(
                         {
                             collection: data,
                             arcSelection: selection,
-                            added: false
+                            updated: false
                         },
                         () => this.update(this.state.collection)
                     );
@@ -155,11 +160,21 @@ class PieChart extends React.Component<{}, State> {
                     this.setState({
                         name: "",
                         price: "",
-                        message: "sucessfully added!",
-                        added: true
+                        message: "sucessfully updated!",
+                        updated: true
                     })
                 );
         }
+    };
+
+    del = (d: string) => {
+        db.collection("expenses")
+            .doc(d)
+            .delete()
+            .then(() => {
+                this.setState({ updated: true });
+            })
+            .catch(err => console.log(err));
     };
     nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({ name: e.target.value, message: "" });
@@ -204,6 +219,21 @@ class PieChart extends React.Component<{}, State> {
                         Add Item
                     </button>
                 </form>
+                <ul>
+                    {this.state.collection.map(doc => {
+                        return (
+                            <div key={doc.name}>
+                                <li>
+                                    {doc.name} | {doc.price}
+                                </li>
+                                <button onClick={() => this.del(doc.id!)}>
+                                    {" "}
+                                    Delete
+                                </button>
+                            </div>
+                        );
+                    })}
+                </ul>
             </div>
         );
     }
