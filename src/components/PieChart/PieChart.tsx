@@ -21,6 +21,7 @@ type State = {
     message: string;
     arcSelection: Selection<SVGSVGElement | null, {}, null, undefined> | null;
     collection: Datum[];
+    added: boolean;
 };
 
 class PieChart extends React.Component<{}, State> {
@@ -44,7 +45,8 @@ class PieChart extends React.Component<{}, State> {
         price: "",
         message: "",
         arcSelection: null,
-        collection: []
+        collection: [],
+        added: false
     };
 
     componentDidMount() {
@@ -64,19 +66,25 @@ class PieChart extends React.Component<{}, State> {
     }
 
     componentDidUpdate() {
-        db.collection("expenses")
-            .get()
-            .then(res => {
-                let data: Datum[] = [];
-                res.docs.forEach(doc => {
-                    data.push(doc.data() as any);
+        if (this.state.added) {
+            db.collection("expenses")
+                .get()
+                .then(res => {
+                    let data: Datum[] = [];
+                    res.docs.forEach(doc => {
+                        data.push(doc.data() as any);
+                    });
+                    const selection = select(this.arcRef.current);
+                    this.setState(
+                        {
+                            collection: data,
+                            arcSelection: selection,
+                            added: false
+                        },
+                        () => this.update(this.state.collection)
+                    );
                 });
-                const selection = select(this.arcRef.current);
-                this.setState(
-                    { collection: data, arcSelection: selection },
-                    () => this.update(this.state.collection)
-                );
-            });
+        }
     }
     renderPie = () => {
         const arcSelection = this.state.arcSelection;
@@ -107,6 +115,10 @@ class PieChart extends React.Component<{}, State> {
                 .selectAll("path")
                 .data(this.pieChart(data));
 
+            paths.exit().remove();
+
+            paths.attr("d", this.arcPath as any);
+
             paths
                 .enter()
                 .append("path")
@@ -130,7 +142,8 @@ class PieChart extends React.Component<{}, State> {
                     this.setState({
                         name: "",
                         price: "",
-                        message: "sucessfully added!"
+                        message: "sucessfully added!",
+                        added: true
                     })
                 );
         }
